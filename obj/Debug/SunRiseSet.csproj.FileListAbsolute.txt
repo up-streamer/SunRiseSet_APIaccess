@@ -28,3 +28,33 @@ C:\Users\RSS\Documents\Visual Studio 2012\Projects\C#\NetduinoApplication1\Netdu
 C:\Users\RSS\Documents\Visual Studio 2012\Projects\C#\NetduinoApplication1\NetduinoApplication1\obj\Debug\le\NetduinoApplication1.pdbx
 C:\Users\RSS\Documents\Visual Studio 2012\Projects\C#\NetduinoApplication1\NetduinoApplication1\obj\Debug\NetduinoApplication1.exe
 C:\Users\RSS\Documents\Visual Studio 2012\Projects\C#\NetduinoApplication1\NetduinoApplication1\obj\Debug\NetduinoApplication1.pdb
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\le\NetduinoApplication1.exe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\be\NetduinoApplication1.exe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\le\NetduinoApplication1.pdb
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\be\NetduinoApplication1.pdb
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\NetduinoApplication1.exe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\NetduinoApplication1.pdb
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\le\NetduinoApplication1.pe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\le\NetduinoApplication1.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\be\NetduinoApplication1.pe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\be\NetduinoApplication1.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\LE\SecretLabs.NETMF.Hardware.pe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\LE\SecretLabs.NETMF.Hardware.Netduino.pe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\BE\SecretLabs.NETMF.Hardware.pe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\BE\SecretLabs.NETMF.Hardware.Netduino.pe
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\LE\SecretLabs.NETMF.Hardware.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\LE\SecretLabs.NETMF.Hardware.Netduino.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\BE\SecretLabs.NETMF.Hardware.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\BE\SecretLabs.NETMF.Hardware.Netduino.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\SecretLabs.NETMF.Hardware.dll
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\SecretLabs.NETMF.Hardware.Netduino.dll
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\SecretLabs.NETMF.Hardware.pdb
+C:\Git Repositories\SunRiseSet_APIaccess\bin\Debug\SecretLabs.NETMF.Hardware.Netduino.pdb
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\SunRiseSet.csprojResolveAssemblyReference.cache
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\TinyCLR_DebugReferences.cache
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\be\NetduinoApplication1.pe
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\be\NetduinoApplication1.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\le\NetduinoApplication1.pe
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\le\NetduinoApplication1.pdbx
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\NetduinoApplication1.exe
+C:\Git Repositories\SunRiseSet_APIaccess\obj\Debug\NetduinoApplication1.pdb

@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using Microsoft.SPOT;
 using Microsoft.SPOT.Net.NetworkInformation;
+using MicroJSON;
 
 namespace SunRiseSet
 {
@@ -24,6 +25,26 @@ namespace SunRiseSet
             sunAPI.Run();
 //{"results":{"sunrise":"6:02:42 AM","sunset":"6:20:35 PM","solar_noon":"12:11:38 PM","day_length":"12:17:53","civil_twilight_begin":"5:36:54 AM","civil_twilight_end":"6:46:22 PM","nautical_twilight_begin":"5:06:36 AM","nautical_twilight_end":"7:16:41 PM","astronomical_twilight_begin":"4:35:47 AM","astronomical_twilight_end":"7:47:30 PM"},"status":"OK"}
 
+            //Test Json parser
+            var json = "{\"results\":{\"sunrise\":\"6:02:42 AM\",\"sunset\":\"6:20:35 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
+            
+            var jParsed = (JObject)JsonParser.Parse(json);
+
+            var results = (JObject)jParsed["results"];
+
+            string sunrise = (string)results["sunrise"];
+
+            string sunset = (string)results["sunset"];
+
+            string status = (string)jParsed["status"];
+
+            Debug.Print(sunset);
+            Debug.Print(sunrise);
+            Debug.Print(status);
+
+            // End of test code
+            
+            
             OutputPort led = new OutputPort(Pins.ONBOARD_LED, false);
             while (sunAPI.IsRunning)
             {
