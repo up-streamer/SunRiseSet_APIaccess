@@ -1,5 +1,5 @@
 # SunRiseSet_APIaccess
-Base code to control lights turn on/turn off using sunrise-sunset API
+Base code to control lights turn on/off using sunrise-sunset API
 
 Initial Web Access code from Netduino Web Request Multithreaded sample:
 
