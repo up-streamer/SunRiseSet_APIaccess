@@ -7,7 +7,7 @@ Initial Web Access code from Netduino Web Request Multithreaded sample:
 
 Get sunrise and sunset time from:
 
-  https://www.api.sunrise-sunset.org/ to control lights
+  https://www.api.sunrise-sunset.org/
 
 Using Json Mario Vernari's Json Parser from:
 
