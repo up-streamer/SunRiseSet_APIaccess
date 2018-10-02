@@ -12,39 +12,53 @@ namespace SunRiseSet
 {
     public class Program
     {
+
         public static void Main()
         {
+
+            Utility.SetLocalTime(new DateTime(2018, 09, 28, 5, 0, 00));
+
             App sunAPI = new App();
 
             sunAPI.RequestAddress = "http://api.sunrise-sunset.org/json";
-            sunAPI.Latitude = "36.7201600";
-            sunAPI.Longitude = "-4.4203400";
-            sunAPI.GmtOffset = -2;
+            sunAPI.Latitude = "-22.9523316";
+            sunAPI.Longitude ="-43.2202229";
+            //sunAPI.GmtOffset = -2;
             //final URL ("http://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400");
 
-            sunAPI.Run();
-//{"results":{"sunrise":"6:02:42 AM","sunset":"6:20:35 PM","solar_noon":"12:11:38 PM","day_length":"12:17:53","civil_twilight_begin":"5:36:54 AM","civil_twilight_end":"6:46:22 PM","nautical_twilight_begin":"5:06:36 AM","nautical_twilight_end":"7:16:41 PM","astronomical_twilight_begin":"4:35:47 AM","astronomical_twilight_end":"7:47:30 PM"},"status":"OK"}
+            //sunAPI.Run();
+            //{"results":{"sunrise":"6:02:42 AM","sunset":"6:20:35 PM","solar_noon":"12:11:38 PM","day_length":"12:17:53","civil_twilight_begin":"5:36:54 AM","civil_twilight_end":"6:46:22 PM","nautical_twilight_begin":"5:06:36 AM","nautical_twilight_end":"7:16:41 PM","astronomical_twilight_begin":"4:35:47 AM","astronomical_twilight_end":"7:47:30 PM"},"status":"OK"}
 
             //Test Json parser
-            var json = "{\"results\":{\"sunrise\":\"6:02:42 AM\",\"sunset\":\"6:20:35 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
-            
-            var jParsed = (JObject)JsonParser.Parse(json);
+            string json = "{\"results\":{\"sunrise\":\"6:00:00 AM\",\"sunset\":\"7:00:00 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
 
-            var results = (JObject)jParsed["results"];
+         
+          //  var jParsed = (JObject)JsonParser.Parse(results);
+           // var innerJson = (JObject)jParsed["results"];
 
-            string sunrise = (string)results["sunrise"];
+            HandleResults Handle = new HandleResults(json);
+            Handle.GmtOffSet = 0;
 
-            string sunset = (string)results["sunset"];
+            Debug.Print(Handle.getSunRiseMillisec.ToString());
+            Debug.Print(Handle.getSunSetMillisec.ToString());
+            Debug.Print(DateTime.Now.ToString());
 
-            string status = (string)jParsed["status"];
+            // var jParsed = (JObject)JsonParser.Parse(json);
 
-            Debug.Print(sunset);
-            Debug.Print(sunrise);
-            Debug.Print(status);
+            //var results = (JObject)jParsed["results"];
+
+            //string sunrise = (string)results["sunrise"];
+
+
+            //string status = (string)jParsed["status"];
+
+            // Debug.Print(sunset);
+            // Debug.Print(sunrise);
+            // Debug.Print(status);
 
             // End of test code
-            
-            
+
+
             OutputPort led = new OutputPort(Pins.ONBOARD_LED, false);
             while (sunAPI.IsRunning)
             {
@@ -67,8 +81,6 @@ namespace SunRiseSet
 
         public string Longitude { get; set; }
 
-        public int GmtOffset { get; set; }
-
         private string requestAddress;
 
         public string RequestAddress
@@ -88,8 +100,8 @@ namespace SunRiseSet
 
             if (goodToGo)
             {
-               requestResponse =  MakeWebRequest(RequestAddress);
-               Debug.Print(requestResponse);
+                requestResponse = MakeWebRequest(RequestAddress);
+                Debug.Print(requestResponse);
             }
 
             this.IsRunning = false;
@@ -268,5 +280,71 @@ namespace SunRiseSet
             return hexString;
         }
 
+    }
+
+    public class HandleResults
+    {
+        /// <summary>
+        /// Constructor:
+        /// Manipulate Json string API response 
+        /// </summary>
+        public HandleResults(string JsonString)
+        {
+            var jParsed = (JObject)JsonParser.Parse(JsonString);
+            var innerJson = (JObject)jParsed["results"];
+
+            sunSet = (string)innerJson["sunset"];
+            sunRise = (string)innerJson["sunrise"];
+            status = (string)jParsed["status"];
+        }
+        const int PM = 43200000; // 12 hours in miliseconds
+
+        string sunSet;
+        string sunRise;
+        string status;
+
+        private int gmtoffset;
+        public int GmtOffSet
+        {
+            get { return gmtoffset * 3600000; }
+            set { gmtoffset = value; }
+        }
+
+        public int getSunRiseMillisec
+        {
+            get { return (StringToTimeSpan(sunRise) + GmtOffSet); }
+        }
+
+        public int getSunSetMillisec
+        {
+            get { return (StringToTimeSpan(sunSet) + PM + GmtOffSet); }
+        }
+
+
+        //Debug.Print(DateTime.Now.ToString());
+
+        /// <summary>
+        /// Get DateTime and time string hh:mm:ss AM/PM and
+        /// return today timeSpan in milliseconds
+        /// </summary>
+        public int StringToTimeSpan(string timeString)
+        {
+            char[] charSeparators = new char[] { ':' };
+
+            timeString = timeString.Substring(0, timeString.Length - 3); //remove "AM"/"PM"
+            string[] timeStringArray = timeString.Split(charSeparators);
+
+            int hours = int.Parse(timeStringArray[0]);
+            int minutes = int.Parse(timeStringArray[1]);
+            int seconds = int.Parse(timeStringArray[2]);
+            Debug.Print(hours.ToString() + ":" + minutes.ToString() + ":" + seconds.ToString());
+
+            Debug.Print("Today: " + DateTime.Today.ToString());
+            DateTime eventAt = DateTime.Today + new TimeSpan(hours, minutes, seconds);
+            long inTicks = eventAt.Ticks - DateTime.Now.Ticks;
+            return (int)(inTicks / TimeSpan.TicksPerMillisecond);
+            
+            
+        }
     }
 }
