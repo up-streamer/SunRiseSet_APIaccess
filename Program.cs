@@ -16,8 +16,9 @@ namespace SunRiseSet
         public static void Main()
         {
 
-            Utility.SetLocalTime(new DateTime(2018, 09, 28, 5, 0, 00));
+            Utility.SetLocalTime(new DateTime(2018, 10, 8, 5, 0, 00));
 
+            OutputPort light = new OutputPort(Pins.GPIO_PIN_D0, false);
             App sunAPI = new App();
 
             sunAPI.RequestAddress = "http://api.sunrise-sunset.org/json";
@@ -39,10 +40,18 @@ namespace SunRiseSet
             HandleResults Handle = new HandleResults(json);
             Handle.GmtOffSet = 0;
 
+            if (Handle.getSunRiseMillisec > 0) { 
+            }
+
+            if (Handle.getSunSetMillisec > 0) {
+            }
+            else {
+            };
             Debug.Print(Handle.getSunRiseMillisec.ToString());
             Debug.Print(Handle.getSunSetMillisec.ToString());
             Debug.Print(DateTime.Now.ToString());
-
+            int a = Handle.StringToTimeSpan("4:00:00 PM");
+            Debug.Print("16:00 timespan in milis from datetime.now " + a.ToString());
             // var jParsed = (JObject)JsonParser.Parse(json);
 
             //var results = (JObject)jParsed["results"];
@@ -59,7 +68,7 @@ namespace SunRiseSet
             // End of test code
 
 
-            OutputPort led = new OutputPort(Pins.ONBOARD_LED, false);
+            OutputPort led= new OutputPort(Pins.ONBOARD_LED, false);
             while (sunAPI.IsRunning)
             {
                 led.Write(true); // turn on the LED
@@ -297,7 +306,6 @@ namespace SunRiseSet
             sunRise = (string)innerJson["sunrise"];
             status = (string)jParsed["status"];
         }
-        const int PM = 43200000; // 12 hours in miliseconds
 
         string sunSet;
         string sunRise;
@@ -317,24 +325,30 @@ namespace SunRiseSet
 
         public int getSunSetMillisec
         {
-            get { return (StringToTimeSpan(sunSet) + PM + GmtOffSet); }
+            get { return (StringToTimeSpan(sunSet) + GmtOffSet); }
         }
 
 
         //Debug.Print(DateTime.Now.ToString());
 
         /// <summary>
-        /// Get DateTime and time string hh:mm:ss AM/PM and
-        /// return today timeSpan in milliseconds
+        /// Get time as a string "hh:mm:ss AM/PM" and
+        /// return today timeSpan in milliseconds from DateTime.Now
         /// </summary>
         public int StringToTimeSpan(string timeString)
         {
-            char[] charSeparators = new char[] { ':' };
+            char[] charSeparator = new char[] { ' ' };
+            string[] ts = timeString.Split(charSeparator);
+            timeString = ts[0];
+            string meridiem = ts[1].ToUpper();
+            Debug.Print("--->" + timeString);
 
-            timeString = timeString.Substring(0, timeString.Length - 3); //remove "AM"/"PM"
-            string[] timeStringArray = timeString.Split(charSeparators);
+            charSeparator = new char[] { ':' };
+            timeString = timeString.Substring(0, timeString.Length);
+            string[] timeStringArray = timeString.Split(charSeparator);
 
             int hours = int.Parse(timeStringArray[0]);
+            if (meridiem == "PM") { hours = hours + 12; }
             int minutes = int.Parse(timeStringArray[1]);
             int seconds = int.Parse(timeStringArray[2]);
             Debug.Print(hours.ToString() + ":" + minutes.ToString() + ":" + seconds.ToString());
