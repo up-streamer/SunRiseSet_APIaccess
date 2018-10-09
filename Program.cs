@@ -12,18 +12,18 @@ namespace SunRiseSet
 {
     public class Program
     {
-
+       
         public static void Main()
         {
 
             Utility.SetLocalTime(new DateTime(2018, 10, 8, 5, 0, 00));
 
-            OutputPort light = new OutputPort(Pins.GPIO_PIN_D0, false);
+
             App sunAPI = new App();
 
             sunAPI.RequestAddress = "http://api.sunrise-sunset.org/json";
             sunAPI.Latitude = "-22.9523316";
-            sunAPI.Longitude ="-43.2202229";
+            sunAPI.Longitude = "-43.2202229";
             //sunAPI.GmtOffset = -2;
             //final URL ("http://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400");
 
@@ -33,42 +33,41 @@ namespace SunRiseSet
             //Test Json parser
             string json = "{\"results\":{\"sunrise\":\"6:00:00 AM\",\"sunset\":\"7:00:00 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
 
-         
-          //  var jParsed = (JObject)JsonParser.Parse(results);
-           // var innerJson = (JObject)jParsed["results"];
 
+            //  var jParsed = (JObject)JsonParser.Parse(results);
+            // var innerJson = (JObject)jParsed["results"];
+            lightControl lightControl = new lightControl();
+            
             HandleResults Handle = new HandleResults(json);
             Handle.GmtOffSet = 0;
-
-            if (Handle.getSunRiseMillisec > 0) { 
+            
+            
+            if (Handle.getSunRiseMillisec > 0)
+            {
+                lightControl.delay = Handle.getSunRiseMillisec;
+                Thread offDelay = new Thread(lightControl.turnOff);
+                offDelay.Start(); 
             }
 
-            if (Handle.getSunSetMillisec > 0) {
+            if (Handle.getSunSetMillisec > 0)
+            {
+                lightControl.delay = Handle.getSunSetMillisec;
+                Thread offDelay = new Thread(lightControl.turnOn);
+                offDelay.Start();
             }
-            else {
-            };
+            else
+            {
+                lightControl.light.Write(true); //turn light straight on
+            }
+            
             Debug.Print(Handle.getSunRiseMillisec.ToString());
             Debug.Print(Handle.getSunSetMillisec.ToString());
             Debug.Print(DateTime.Now.ToString());
             int a = Handle.StringToTimeSpan("4:00:00 PM");
-            Debug.Print("16:00 timespan in milis from datetime.now " + a.ToString());
-            // var jParsed = (JObject)JsonParser.Parse(json);
+            Debug.Print("16:00 timespan in millis from datetime.now " + a.ToString());
 
-            //var results = (JObject)jParsed["results"];
+            OutputPort led = new OutputPort(Pins.ONBOARD_LED, false);
 
-            //string sunrise = (string)results["sunrise"];
-
-
-            //string status = (string)jParsed["status"];
-
-            // Debug.Print(sunset);
-            // Debug.Print(sunrise);
-            // Debug.Print(status);
-
-            // End of test code
-
-
-            OutputPort led= new OutputPort(Pins.ONBOARD_LED, false);
             while (sunAPI.IsRunning)
             {
                 led.Write(true); // turn on the LED
@@ -80,8 +79,27 @@ namespace SunRiseSet
 
             Debug.Print("App finished.");
         }
-    }
+        
 
+
+    }
+    public class lightControl
+    {
+        public int delay { get; set; }
+        public OutputPort light = new OutputPort(Pins.GPIO_PIN_D0, false);
+
+        public void turnOff()
+        {
+            Thread.Sleep(delay);
+            light.Write(false);
+        }
+
+        public void turnOn()
+        {
+            Thread.Sleep(delay);
+            light.Write(true);
+        }
+    }
     public class App
     {
         NetworkInterface[] _interfaces;
@@ -357,8 +375,8 @@ namespace SunRiseSet
             DateTime eventAt = DateTime.Today + new TimeSpan(hours, minutes, seconds);
             long inTicks = eventAt.Ticks - DateTime.Now.Ticks;
             return (int)(inTicks / TimeSpan.TicksPerMillisecond);
-            
-            
+
+
         }
     }
 }
