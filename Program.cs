@@ -38,7 +38,7 @@ namespace SunRiseSet
             schedule.sunAPI.Longitude = Longitude;
             schedule.sunAPI.RequestAddress = RequestAddress;
 
-            schedule.run();
+            schedule.Run();
 
             OutputPort led = new OutputPort(Pins.ONBOARD_LED, false);
 
@@ -69,7 +69,7 @@ namespace SunRiseSet
         HandleResults Handle = new HandleResults();
         LightControl lightControl = new LightControl();
 
-        public void run()
+        public void Run()
         {
             Handle.GmtOffSet = gmtOffSet;
 
@@ -83,10 +83,13 @@ namespace SunRiseSet
                     {
                         jsonString = sunAPI.requestResponse;
                         HandleResults.ParseJson(jsonString);
-                        defaultSunRiseTime = HandleResults.sunRiseTime;
-                        defaultSunSetTime = HandleResults.sunSetTime;
 
-                        cnt = 3;
+                        if (HandleResults.status == "OK")
+                        {
+                            defaultSunRiseTime = HandleResults.sunRiseTime;
+                            defaultSunSetTime = HandleResults.sunSetTime;
+                            cnt = 3; //All good. End the loop.
+                        }
                     }
                     else
                     {
@@ -109,7 +112,8 @@ namespace SunRiseSet
                 onDelay = new Thread(lightControl.turnOn);
                 onDelay.Start();
 
-                if (Handle.getSunSetMillisec > ONEDAY)
+                //Time to turn on the light today already passed.
+                if (Handle.getSunSetMillisec > ONEDAY) 
                 {
                     lightControl.light.Write(true); //turn light straight on
                 };
