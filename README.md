@@ -9,6 +9,6 @@ Get sunrise and sunset time from:
 
   https://www.api.sunrise-sunset.org/
 
-Using Json Mario Vernari's Json Parser from:
+Using Mario Vernari's Json Parser from:
 
   https://highfieldtales.wordpress.com/2014/03/06/micro-json-for-netduino-and-pc/
