@@ -18,8 +18,7 @@ namespace SunRiseSet
 
             Utility.SetLocalTime(new DateTime(2018, 10, 15, 00, 59, 00));
             string timeToUpdate = "1:00:00 AM"; //Scheduled hour to access the API server.
-            int gmtOffSet = 0;
-            App sunAPI = new App();
+            int gmtOffSet = -4; //hours
 
             string RequestAddress = "http://api.sunrise-sunset.org/json";
             string Latitude = "-22.9523316";
@@ -28,7 +27,7 @@ namespace SunRiseSet
             //final URL ("http://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400");
 
             //Test Json parser
-            string json = "{\"results\":{\"sunrise\":\"6:00:00 AM\",\"sunset\":\"7:00:00 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
+            //string json = "{\"results\":{\"sunrise\":\"6:00:00 AM\",\"sunset\":\"7:00:00 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
 
             Schedule schedule = new Schedule();
             schedule.timeToUpdate = timeToUpdate;
@@ -42,7 +41,7 @@ namespace SunRiseSet
 
             OutputPort led = new OutputPort(Pins.ONBOARD_LED, false);
 
-            while (sunAPI.IsRunning)
+            while (schedule.sunAPI.IsRunning)
             {
                 led.Write(true); // turn on the LED
                 Thread.Sleep(250); // sleep for 250ms
@@ -102,12 +101,12 @@ namespace SunRiseSet
                     }
                 }
 
-                offDelay = null;
+                lightControl.Dispose(offDelay);
                 lightControl.delay = Handle.getSunRiseMillisec;
                 offDelay = new Thread(lightControl.turnOff);
                 offDelay.Start();
 
-                onDelay = null;
+                lightControl.Dispose(onDelay);
                 lightControl.delay = Handle.getSunSetMillisec;
                 onDelay = new Thread(lightControl.turnOn);
                 onDelay.Start();
@@ -137,6 +136,22 @@ namespace SunRiseSet
         {
             Thread.Sleep(delay);
             light.Write(true);
+        }
+
+        public void Dispose(Thread serviceThread)
+        {
+            // Close Thread
+            if (serviceThread != null)
+            {
+                try
+                {   serviceThread.Join();
+                    GC.SuppressFinalize(serviceThread);
+                    serviceThread = null; 
+                }
+                catch () {}
+                serviceThread = null;
+            }
+
         }
     }
 
