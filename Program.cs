@@ -17,7 +17,7 @@ namespace SunRiseSet
         {
 
             Utility.SetLocalTime(new DateTime(2018, 10, 15, 00, 59, 00));
-            string timeToUpdate = "1:00:00 AM"; //Scheduled hour to access the API server.
+            string timeToUpdate = "1:00:00 AM"; //Scheduled time to access the API server.
             int gmtOffSet = -4; //hours
 
             string RequestAddress = "http://api.sunrise-sunset.org/json";
@@ -26,12 +26,12 @@ namespace SunRiseSet
 
             //final URL ("http://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400");
 
-            //Test Json parser
+            //Test string for Json parser
             //string json = "{\"results\":{\"sunrise\":\"6:00:00 AM\",\"sunset\":\"7:00:00 PM\",\"solar_noon\":\"12:11:38 PM\",\"day_length\":\"12:17:53\",\"civil_twilight_begin\":\"5:36:54 AM\",\"civil_twilight_end\":\"6:46:22 PM\",\"nautical_twilight_begin\":\"5:06:36 AM\",\"nautical_twilight_end\":\"7:16:41 PM\",\"astronomical_twilight_begin\":\"4:35:47 AM\",\"astronomical_twilight_end\":\"7:47:30 PM\"},\"status\":\"OK\"}";
 
             Schedule schedule = new Schedule();
-            schedule.timeToUpdate = timeToUpdate;
-            schedule.gmtOffSet = gmtOffSet;
+            schedule.Handle.timeToUpdate = timeToUpdate;
+            schedule.Handle.GmtOffSet = gmtOffSet;
 
             schedule.sunAPI.Latitude = Latitude;
             schedule.sunAPI.Longitude = Longitude;
@@ -47,7 +47,6 @@ namespace SunRiseSet
                 Thread.Sleep(250); // sleep for 250ms
                 led.Write(false); // turn off the LED
                 Thread.Sleep(250); // sleep for 250ms
-
             }
         }
     }
@@ -57,7 +56,7 @@ namespace SunRiseSet
         public static string jsonString;
         const int ONEDAY = 86400000; // In milliseconds.,
         public string timeToUpdate;
-        public int gmtOffSet;
+
         string defaultSunRiseTime = "6:00:00 AM";
         string defaultSunSetTime = "6:00:00 PM";
 
@@ -65,12 +64,11 @@ namespace SunRiseSet
         Thread onDelay;
 
         public App sunAPI = new App();
-        HandleResults Handle = new HandleResults();
+        public HandleResults Handle = new HandleResults();
         LightControl lightControl = new LightControl();
 
         public void Run()
         {
-            Handle.GmtOffSet = gmtOffSet;
 
             while (true)
             {
@@ -106,17 +104,20 @@ namespace SunRiseSet
                 offDelay = new Thread(lightControl.turnOff);
                 offDelay.Start();
 
-                lightControl.Dispose(onDelay);
-                lightControl.delay = Handle.getSunSetMillisec;
-                onDelay = new Thread(lightControl.turnOn);
-                onDelay.Start();
-
-                //Time to turn on the light today already passed.
-                if (Handle.getSunSetMillisec > ONEDAY) 
+                //The event time is within Today
+                if (Handle.getSunSetMillisec < ONEDAY)
+                {
+                    lightControl.Dispose(onDelay);
+                    lightControl.delay = Handle.getSunSetMillisec;
+                    onDelay = new Thread(lightControl.turnOn);
+                    onDelay.Start();
+                }
+                else
                 {
                     lightControl.light.Write(true); //turn light straight on
                 };
-                Thread.Sleep(Handle.StringToTimeSpan(timeToUpdate)); // wait until next schedule
+
+                Thread.Sleep(Handle.getTimeToUpdateMillisec); // wait until next schedule
             }
         }
     }
@@ -140,7 +141,7 @@ namespace SunRiseSet
 
         public void Dispose(Thread serviceThread)
         {
-            // Close Thread
+            // Terminate Thread
             if (serviceThread != null)
             {
                 try
@@ -148,10 +149,9 @@ namespace SunRiseSet
                     GC.SuppressFinalize(serviceThread);
                     serviceThread = null; 
                 }
-                catch () {}
+                catch (Exception ex) {}
                 serviceThread = null;
             }
-
         }
     }
 
@@ -377,6 +377,7 @@ namespace SunRiseSet
         public static string sunRiseTime;
         public static string sunSetTime;
         public static string status;
+        public string timeToUpdate;
 
         /// <summary>
         /// Manipulate Json string from API response 
@@ -409,11 +410,16 @@ namespace SunRiseSet
             get { return (StringToTimeSpan(sunSetTime) + GmtOffSet); }
         }
 
+        public int getTimeToUpdateMillisec
+        {
+            get { return StringToTimeSpan(timeToUpdate); }
+        }
+
         /// <summary>
         /// Get time as a string "hh:mm:ss AM/PM" and
         /// return today timeSpan in milliseconds from DateTime.Now
         /// </summary>
-        public int StringToTimeSpan(string timeString)
+        private int StringToTimeSpan(string timeString)
         {
             char[] charSeparator = new char[] { ' ' };
             string[] ts = timeString.Split(charSeparator);
