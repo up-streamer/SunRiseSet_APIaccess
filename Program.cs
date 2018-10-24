@@ -19,6 +19,7 @@ namespace SunRiseSet
             Utility.SetLocalTime(new DateTime(2018, 10, 15, 00, 59, 00));
             string timeToUpdate = "1:00:00 AM"; //Scheduled time to access the API server.
             int gmtOffSet = -4; //hours
+            int dstOffSet = 0; //hours
 
             string RequestAddress = "http://api.sunrise-sunset.org/json";
             string Latitude = "-22.9523316";
@@ -31,7 +32,8 @@ namespace SunRiseSet
 
             Schedule schedule = new Schedule();
             schedule.Handle.timeToUpdate = timeToUpdate;
-            schedule.Handle.GmtOffSet = gmtOffSet;
+            schedule.Handle.gmtOffSet = gmtOffSet;
+            schedule.Handle.dstOffSet = dstOffSet;
 
             schedule.sunAPI.Latitude = Latitude;
             schedule.sunAPI.Longitude = Longitude;
@@ -377,7 +379,6 @@ namespace SunRiseSet
         public static string sunRiseTime;
         public static string sunSetTime;
         public static string status;
-        public string timeToUpdate;
 
         /// <summary>
         /// Manipulate Json string from API response 
@@ -393,26 +394,35 @@ namespace SunRiseSet
             status = (string)jParsed["status"];
         }
 
-        private int gmtoffset;
-        public int GmtOffSet
+        private int dstSet;
+        public int dstOffSet
         {
-            get { return gmtoffset * 3600000; } // 1 hour in milliseconds
-            set { gmtoffset = value; }
+            get { return dstSet  * 3600000; } // 1 hour in milliseconds
+            set { dstSet = value; }
+
+        }
+
+        private int gmtSet;
+        public int gmtOffSet
+        {
+            get { return gmtSet * 3600000; }
+            set { gmtSet = value; }
         }
 
         public int getSunRiseMillisec
         {
-            get { return (StringToTimeSpan(sunRiseTime) + GmtOffSet); }
+            get { return (StringToTimeSpan(sunRiseTime) + gmtOffSet - dstOffSet); }
         }
 
         public int getSunSetMillisec
         {
-            get { return (StringToTimeSpan(sunSetTime) + GmtOffSet); }
+            get { return (StringToTimeSpan(sunSetTime) + gmtOffSet - dstOffSet); }
         }
 
+        public string timeToUpdate;
         public int getTimeToUpdateMillisec
         {
-            get { return StringToTimeSpan(timeToUpdate); }
+            get { return StringToTimeSpan(timeToUpdate) - dstOffSet; }
         }
 
         /// <summary>
@@ -442,7 +452,7 @@ namespace SunRiseSet
             long inTicks = eventAt.Ticks - DateTime.Now.Ticks; // Using ticks to reduce calc error.
             if (inTicks <= 0)
             {
-                eventAt = DateTime.Today.AddDays(1) + new TimeSpan(hours, minutes, seconds); //Next day.
+                eventAt.AddDays(1); //Schedule to next day.
                 inTicks = eventAt.Ticks - DateTime.Now.Ticks;
             };
             return (int)(inTicks / TimeSpan.TicksPerMillisecond);
