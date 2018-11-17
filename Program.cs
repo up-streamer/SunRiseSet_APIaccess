@@ -18,8 +18,8 @@ namespace SunRiseSet
 
             Utility.SetLocalTime(new DateTime(2018, 10, 15, 00, 59, 00));
             string timeToUpdate = "1:00:00 AM"; //Scheduled time to access the API server.
-            int gmtOffSet = -4; //hours
-            int dstOffSet = 0; //hours
+            int gmtOffSet = -4; //hours. 
+            int dstOffSet = 0; //hours. If no DST period, leave 0.
 
             string RequestAddress = "http://api.sunrise-sunset.org/json";
             string Latitude = "-22.9523316";
@@ -385,7 +385,6 @@ namespace SunRiseSet
         /// </summary>
         public static void ParseJson(string JsonString)
         {
-
             var jParsed = (JObject)JsonParser.Parse(JsonString);
             var innerJson = (JObject)jParsed["results"];
 
@@ -393,36 +392,30 @@ namespace SunRiseSet
             sunRiseTime = (string)innerJson["sunrise"];
             status = (string)jParsed["status"];
         }
-
-        private int dstSet;
-        public int dstOffSet
-        {
-            get { return dstSet  * 3600000; } // 1 hour in milliseconds
-            set { dstSet = value; }
-
-        }
+       
+        public int dstOffSet { get; set; }
 
         private int gmtSet;
         public int gmtOffSet
         {
-            get { return gmtSet * 3600000; }
+            get { return (gmtSet + dstOffSet) * 3600000; } // 1 hour in milliseconds
             set { gmtSet = value; }
         }
 
         public int getSunRiseMillisec
         {
-            get { return (StringToTimeSpan(sunRiseTime) + gmtOffSet - dstOffSet); }
+            get { return (StringToTimeSpan(sunRiseTime) + gmtOffSet + dstOffSet); }
         }
 
         public int getSunSetMillisec
         {
-            get { return (StringToTimeSpan(sunSetTime) + gmtOffSet - dstOffSet); }
+            get { return (StringToTimeSpan(sunSetTime) + gmtOffSet + dstOffSet); }
         }
 
         public string timeToUpdate;
         public int getTimeToUpdateMillisec
         {
-            get { return StringToTimeSpan(timeToUpdate) - dstOffSet; }
+            get { return StringToTimeSpan(timeToUpdate); }
         }
 
         /// <summary>
@@ -445,9 +438,7 @@ namespace SunRiseSet
             if (meridiem == "PM") { hours = hours + 12; }
             int minutes = int.Parse(timeStringArray[1]);
             int seconds = int.Parse(timeStringArray[2]);
-            Debug.Print(" Hour in int hms ---> " + hours.ToString() + ":" + minutes.ToString() + ":" + seconds.ToString());
 
-            Debug.Print("Today: " + DateTime.Today.ToString());
             DateTime eventAt = DateTime.Today + new TimeSpan(hours, minutes, seconds);
             long inTicks = eventAt.Ticks - DateTime.Now.Ticks; // Using ticks to reduce calc error.
             if (inTicks <= 0)
